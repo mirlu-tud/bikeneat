@@ -636,4 +636,5 @@ def classify_with_bikeneat(pbf_path, single=False, aggregated=True, output_arg={
         return osm_df
 
     except Exception as e:
-        raise
+        print(f"An error occurred during classification: {str(e)}")
+        return None
