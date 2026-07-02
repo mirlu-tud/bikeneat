@@ -145,7 +145,10 @@ def _prepare_way(way_dict):
     if isinstance(way_dict, gpd.GeoDataFrame):
         if 'tags' in way_dict.columns:
             way_gdf = way_dict
-            way_gdf['tags'] = way_gdf['tags'].apply(json.loads)
+            try:
+                way_gdf['tags'] = way_gdf['tags'].apply(json.loads)
+            except TypeError as exception:
+                way_gdf["tags"] = {}
             way_gdf.reset_index(drop=True, inplace=True)
             way_n = pd.concat([way_gdf, pd.json_normalize(way_gdf['tags'])], axis=1)
             way_n = way_n[way_n.columns.intersection(OSM_KEYS)]
@@ -556,7 +559,7 @@ def classify_with_bikeneat(pbf_path, single=False, aggregated=True, output_arg={
         osm.columns = osm.columns.str.rstrip('_x')
 
         osm_mask = ['id', 'osm_type', 'geometry', 'area']
-        mask = osm.drop(columns=osm_mask).notna().any(axis=1)
+        mask = osm.drop(columns=osm_mask, errors="ignore").notna().any(axis=1)
         osm_df = osm[mask]
 
         # Extract cycling relation membership from PBF file if provided
